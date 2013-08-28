@@ -1609,8 +1609,8 @@
 
             // Deserialize a date from a string
             dateDeserialize: function (dateStr) {
-                var date = dateStr.replace(/\/Date\((.*)\)\//, "$1");
-                date = $.isNumeric(date) ? parseInt(date, 10) : $.trim(date);
+                var date = $.isNumeric(dateStr) ? parseInt(dateStr, 10) : $.trim(dateStr);
+							console.log(new Date(date));
                 return new Date( date );
             },
 
