@@ -11,7 +11,7 @@
 //          onItemClick: function(data) {
 //              alert("Item clicked - show some details");
 //          },
-//          onAddClick: function(dt, rowId) {
+//          onAddClick: function(data, rowId) {
 //              alert("Empty space clicked - add an item!");
 //          },
 //          onRender: function() {
@@ -33,6 +33,7 @@
         var settings = {
             source: null,
             itemsPerPage: 7,
+			columsAfterLastDate: 15,
             months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
             dow: ["S", "M", "T", "W", "T", "F", "S"],
             navigate: "buttons",
@@ -42,7 +43,7 @@
             minScale: "hours",
             waitText: "Please wait...",
             onItemClick: function (data) { return; },
-            onAddClick: function (data) { return; },
+            onAddClick: function (data, rowId) { return; },
             onRender: function() { return; },
             scrollToToday: true
         };
@@ -324,12 +325,12 @@
                 var entries = [];
                 $.each(element.data, function (i, entry) {
                     if (i >= element.pageNum * settings.itemsPerPage && i < (element.pageNum * settings.itemsPerPage + settings.itemsPerPage)) {
-                        entries.push('<div class="row name row' + i + (entry.desc ? '' : ' fn-wide') + '" id="rowheader' + i + '" offset="' + i % settings.itemsPerPage * tools.getCellSize() + '">');
+                        entries.push('<div class="row name row' + i + (entry.desc ? '' : ' fn-wide') + '" data-id="' + entry.id + '" id="rowheader' + i + '" offset="' + i % settings.itemsPerPage * tools.getCellSize() + '">');
                         entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.name + '</span>');
                         entries.push('</div>');
 
                         if (entry.desc) {
-                            entries.push('<div class="row desc row' + i + ' " id="RowdId_' + i + '" data-id="' + entry.id + '">');
+                            entries.push('<div class="row desc row' + i + ' " id="RowdId_' + i + '">');
                             entries.push('<span class="fn-label' + (entry.cssClass ? ' ' + entry.cssClass : '') + '">' + entry.desc + '</span>');
                             entries.push('</div>');
                         }
@@ -1017,7 +1018,7 @@
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime(), element.scaleStep);
                                     var from = $(element).find('#dh-' + dFrom);
 
-                                    var dTo = tools.genId(tools.dateDeserialize(day.to).getTime(), element.scaleStep);
+                                    var dTo = (tools.genId(tools.dateDeserialize(day.to).getTime(), element.scaleStep)) - 1; // Don't show todate as occupied JER
                                     var to = $(element).find('#dh-' + dTo);
 
                                     var cFrom = from.attr("offset");
@@ -1044,7 +1045,7 @@
                                 // **Weekly data**
                                 case "weeks":
                                     var dtFrom = tools.dateDeserialize(day.from);
-                                    var dtTo = tools.dateDeserialize(day.to);
+                                    var dtTo = (tools.dateDeserialize(day.to)) - 1; // Don't show todate as occupied JER
 
                                     if (dtFrom.getDate() <= 3 && dtFrom.getMonth() === 0) {
                                         dtFrom.setDate(dtFrom.getDate() + 4);
@@ -1087,7 +1088,7 @@
                                 // **Monthly data**
                                 case "months":
                                     var dtFrom = tools.dateDeserialize(day.from);
-                                    var dtTo = tools.dateDeserialize(day.to);
+                                    var dtTo = (tools.dateDeserialize(day.to)) - 1; // Don't show todate as occupied JER
 
                                     if (dtFrom.getDate() <= 3 && dtFrom.getMonth() === 0) {
                                         dtFrom.setDate(dtFrom.getDate() + 4);
@@ -1127,7 +1128,7 @@
                                 // **Days**
                                 default:
                                     var dFrom = tools.genId(tools.dateDeserialize(day.from).getTime());
-                                    var dTo = tools.genId(tools.dateDeserialize(day.to).getTime());
+                                    var dTo = (tools.genId(tools.dateDeserialize(day.to).getTime())) - 1; // Don't show todate as occupied JER
 
                                     var from = $(element).find("#dh-" + dFrom);
                                     var cFrom = from.attr("offset");
@@ -1465,7 +1466,7 @@
                         break;
                     default:
                         maxDate.setHours(0);
-                        maxDate.setDate(maxDate.getDate() + 3);
+                        maxDate.setDate(maxDate.getDate() + settings.columsAfterLastDate); // How many days are shown on chart after last date JER
                         break;
                 }
                 return maxDate;
@@ -1610,7 +1611,6 @@
             // Deserialize a date from a string
             dateDeserialize: function (dateStr) {
                 var date = $.isNumeric(dateStr) ? parseInt(dateStr, 10) : $.trim(dateStr);
-							console.log(new Date(date));
                 return new Date( date );
             },
 
